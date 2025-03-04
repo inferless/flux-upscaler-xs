@@ -1,3 +1,6 @@
+import os
+os.environ["HF_HUB_ENABLE_HF_TRANSFER"]='1'
+from huggingface_hub import snapshot_download
 import torch
 from diffusers.utils import load_image
 from diffusers import FluxControlNetModel
@@ -46,7 +49,8 @@ class InferlessPythonModel:
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') # Set device 
         base_model = 'black-forest-labs/FLUX.1-dev'
         controlnet_model = 'jasperai/Flux.1-dev-Controlnet-Upscaler'
-          
+        snapshot_download(repo_id=base_model,allow_patterns=["*.safetensors"])
+        snapshot_download(repo_id=controlnet_model,allow_patterns=["*.safetensors"])
         controlnet = FluxControlNetModel.from_pretrained(controlnet_model, torch_dtype=torch.bfloat16, use_safetensors=True)
         pipe = FluxControlNetPipeline.from_pretrained(base_model, controlnet=controlnet, torch_dtype=torch.bfloat16, use_safetensors=True)
         pipe.vae.enable_slicing()
